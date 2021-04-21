@@ -1,0 +1,16 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "jobtodo": {
+    "host": "",
+    "port": 0,
+    "url": "",
+    "database": "jobtodo",
+    "password": "",
+    "name": "jobtodo",
+    "user": "",
+    "connector": "mongodb"
+  }
+}

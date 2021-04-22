@@ -27,8 +27,7 @@ var messages =  {
 		passwordPattern: "Invalid password pattern",
 		userFName: "Invalid user first name",
 		useraleadyExists: "User is already registered",
-		googleID: "Invalid GoogleId",
-		appointment_already: "Appointment is not available for the given time"
+		invalidResetPin: "Invalid reset pin"
 	}
 };
 module.exports = messages;

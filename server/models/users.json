@@ -22,6 +22,9 @@
     },
     "password": {
       "type": "string"
+    },
+    "reset_pin": {
+      "type": "number"
     }
   },
   "validations": [],

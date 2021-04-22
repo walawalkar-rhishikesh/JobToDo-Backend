@@ -84,6 +84,7 @@ module.exports = function (Users) {
                 full_name: full_name.trim(),
                 email: email.toLowerCase().trim(),
                 password: hash,
+                reset_pin:0
             };
             Users.find({ where: { email } }, (err, response) => {
                 if (err) {
@@ -172,6 +173,117 @@ module.exports = function (Users) {
                         callback(null, mresponseError);
                     }
                 });
+            } else {
+                mresponseError.message = merror.no_records;
+                callback(null, mresponseError);
+            }
+        });
+    };
+    Users.remoteMethod("requestResetPin", {
+        http: { path: "/requestResetPin", verb: "post" },
+        description: "",
+        accepts: [
+            {
+                arg: "email",
+                type: "string",
+                required: true,
+            }
+        ],
+        returns: { arg: "body", type: "object", root: true },
+    });
+    Users.requestResetPin = function (email, callback) {
+        email = email.toLowerCase();
+        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            mresponseError.message = merror.emailFormat;
+            callback(null, mresponseError);
+            return;
+        }
+        Users.findOne({ where: { email } }, (err, response) => {
+            if (err) {
+                mresponseError.message = err;
+                callback(null, mresponseError);
+            } else if (response && response.password) {
+                var result = response;
+                result.reset_pin = Math.floor(Math.random() * 90000) + 10000;
+                response.updateAttributes(result, (response) => {
+                    var mailAttachment = nodeMailerConst.resetPinRequest(result.full_name,result.reset_pin);
+                    sendEmailViaNodeMailer(
+                      result.email,
+                      mailAttachment.subject,
+                      mailAttachment.body
+                    );
+                    mresponseSuccess.message = msuccess.updatePassword;
+                    mresponseSuccess.data = result;
+                    callback(null, mresponseSuccess);
+                });
+            } else {
+                mresponseError.message = merror.no_records;
+                callback(null, mresponseError);
+            }
+        });
+    };
+    Users.remoteMethod("passwordReset", {
+        http: { path: "/passwordReset", verb: "post" },
+        description: "",
+        accepts: [
+            {
+                arg: "email",
+                type: "string",
+                required: true,
+            },
+            {
+                arg: "password",
+                type: "string",
+                required: true,
+            },
+            {
+                arg: "reset_pin",
+                type: "number",
+                required: true,
+            }
+        ],
+        returns: { arg: "body", type: "object", root: true },
+    });
+    Users.passwordReset = function (email, password, reset_pin, callback) {
+        email = email.toLowerCase();
+        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            mresponseError.message = merror.emailFormat;
+            callback(null, mresponseError);
+            return;
+        }
+        if(!reset_pin){
+            mresponseError.message = merror.invalidResetPin;
+            callback(null, mresponseError);
+            return;
+        }
+        Users.findOne({ where: { email } }, (err, response) => {
+            if (err) {
+                mresponseError.message = err;
+                callback(null, mresponseError);
+            } else if (response && response.email) {
+
+                if(response.reset_pin === reset_pin){
+                    var result = response;
+                    generateHashPassword(password.trim()).then((hash) => {
+                        response.password = hash;
+                        response.reset_pin = 0
+                        response.updateAttributes(result, (response) => {
+                            var mailAttachment = nodeMailerConst.passwordResetConfirmation(result.full_name);
+                            sendEmailViaNodeMailer(
+                              result.email,
+                              mailAttachment.subject,
+                              mailAttachment.body
+                            );
+                            mresponseSuccess.message = msuccess.updatePassword;
+                            mresponseSuccess.data = result;
+                            callback(null, mresponseSuccess);
+                        });
+                    })
+                }else{
+                    mresponseError.message = merror.invalidResetPin;
+                    callback(null, mresponseError);
+                    return;
+                }
             } else {
                 mresponseError.message = merror.no_records;
                 callback(null, mresponseError);

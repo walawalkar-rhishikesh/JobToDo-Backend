@@ -4,8 +4,6 @@ var loopback = require('loopback');
 var boot = require('loopback-boot');
 require('dotenv').config()
 
-console.log(process.env.USER)
-
 var app = module.exports = loopback();
 
 app.start = function() {
@@ -38,6 +36,3 @@ process.on('unhandledRejections', (err) => {
 process.on('uncaughtException', (err) => {
   console.log('uncaught exceptions', err);
 });
-
-console.log(process.env)
-

@@ -251,6 +251,15 @@ module.exports = function (Users) {
             callback(null, mresponseError);
             return;
         }
+        if (
+            !password.match(
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+            )
+        ) {
+            mresponseError.message = merror.passwordPattern;
+            callback(null, mresponseError);
+            return;
+        }
         if(!reset_pin){
             mresponseError.message = merror.invalidResetPin;
             callback(null, mresponseError);

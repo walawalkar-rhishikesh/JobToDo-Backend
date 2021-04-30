@@ -10,6 +10,8 @@ let {
     merror,
 } = require("../util/http-messages");
 
+const schedule = require('node-schedule');
+
 let { nodeMailerConst } = require("../util/constants");
 let { generateJWT } = require("../util/jwt-functions");
 let { sendEmailViaNodeMailer } = require("../util/node-mailer");
@@ -85,7 +87,6 @@ module.exports = function (Schedules) {
         scheduled_on,
         callback
     ) {
-
         if (!uid) {
             mresponseError.message = "Invalid user id";
             callback(null, mresponseError);
@@ -116,7 +117,7 @@ module.exports = function (Schedules) {
             description,
             notes,
             meeting_link,
-            scheduled_on : moment(scheduled_on).utc().format()
+            scheduled_on : new Date(scheduled_on)
         }
 
         Schedules.create(scheduleData, (err, response) => {
@@ -127,7 +128,7 @@ module.exports = function (Schedules) {
                 Schedules.app.models.Users.sendScheduleNotification(
                     uid,
                     title,
-                    moment(scheduled_on).local()
+                    scheduleData.scheduled_on
                 );
                 mresponseSuccess.data = response;
                 mresponseSuccess.message = msuccess.insert
@@ -174,10 +175,6 @@ module.exports = function (Schedules) {
             {
                 arg: "meeting_link",
                 type: "string",
-            },
-            {
-                arg: "scheduled_on",
-                type: "string",
             }
         ],
         returns: { arg: "body", type: "object", root: true },
@@ -191,7 +188,6 @@ module.exports = function (Schedules) {
         description,
         notes,
         meeting_link,
-        scheduled_on,
         callback
     ) {
         if (!id) {
@@ -199,21 +195,16 @@ module.exports = function (Schedules) {
             callback(null, mresponseError);
             return;
         }
-        if (!title) {
-            mresponseError.message = "Title cannot be blank";
-            callback(null, mresponseError);
-            return;
-        }
-        if (!description) {
-            mresponseError.message = "Description cannot be blank";
-            callback(null, mresponseError);
-            return;
-        }
-        if (!scheduled_on) {
-            mresponseError.message = "scheduled_on cannot be blank";
-            callback(null, mresponseError);
-            return;
-        }
+        // if (!title) {
+        //     mresponseError.message = "Title cannot be blank";
+        //     callback(null, mresponseError);
+        //     return;
+        // }
+        // if (!description) {
+        //     mresponseError.message = "Description cannot be blank";
+        //     callback(null, mresponseError);
+        //     return;
+        // }
 
         Schedules.findOne(
             {
@@ -226,16 +217,21 @@ module.exports = function (Schedules) {
                     mresponseError.message = err;
                     callback(null, mresponseError);
                 } else if(response){
+                    var userID = response.uid
                     var result = response
-                    result.title = title,
-                    result.company = company
-                    result.contact = contact
-                    result.method = method
-                    result.description = description
-                    result.notes = notes
-                    result.meeting_link = meeting_link
-                    result.scheduled_on = moment(scheduled_on).utc().format()
+                    result.title = title ? title : result.title,
+                    result.company = company ? company : result.company
+                    result.contact = contact ? contact : result.contact
+                    result.method = method ? method : result.method
+                    result.description = description ? description : result.description
+                    result.notes = notes ? notes : result.notes
+                    result.meeting_link = meeting_link ? meeting_link : result.meeting_link
                     response.updateAttributes(result, (response) => {
+
+                        Schedules.app.models.Notifications.addNotification(
+                            userID,
+                            `You have updated a schedule by the name ${result.title} which is scheduled for ${result.scheduled_on}`
+                        );
                         mresponseSuccess.message = msuccess.update;
                         mresponseSuccess.data = result;
                         callback(null, mresponseSuccess);

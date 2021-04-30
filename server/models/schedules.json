@@ -39,7 +39,7 @@
       "type": "string",
       "required": false
     },
-    "scheduled_on":{
+    "scheduled_on": {
       "type": "date",
       "required": false
     }

@@ -24,7 +24,7 @@ module.exports = {
             return { subject , body};
         },
         passwordResetConfirmation: (full_name) => {
-            let subject = `JobToDo: Request for password reset`;
+            let subject = `JobToDo: Password reset confirmation`;
             let body = `Hi ${full_name},
                 \n Your password was successfully updated. If not done by you, contact admin asap.
                 \nBest \nTeam JobToDo 
@@ -32,9 +32,9 @@ module.exports = {
             return { subject , body};
         },
         scheduleCreated: (full_name, title, time) => {
-            let subject = `JobToDo: Request for password reset`;
+            let subject = `JobToDo: Schedule created for ${time}`;
             let body = `Hi ${full_name},
-                \nYou have created a new schedule by the name ${title} which is on ${time}.
+                \nYou have created a new schedule by the name ${title} which is scheduled for ${time}.
                 \nBest \nTeam JobToDo 
             `
             return { subject , body};

@@ -39,5 +39,9 @@
   "Schedules": {
     "dataSource": "jobtodo",
     "public": true
+  },
+  "Notifications": {
+    "dataSource": "jobtodo",
+    "public": true
   }
 }

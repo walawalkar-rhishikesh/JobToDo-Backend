@@ -107,6 +107,11 @@ module.exports = function (Users) {
                                 mailAttachment.subject,
                                 mailAttachment.body
                             );
+
+                            Users.app.models.Notifications.addNotification(
+                                response.id,
+                                "Account created"
+                            );
                             response.password = "";
                             mresponseSuccess.message = msuccess.register;
                             response["accessToken"] = generateJWT({ id: response.id });
@@ -283,6 +288,11 @@ module.exports = function (Users) {
                                 mailAttachment.subject,
                                 mailAttachment.body
                             );
+                            Users.app.models.Notifications.addNotification(
+                                response.id,
+                                "Password updated"
+                            );
+
                             mresponseSuccess.message = msuccess.updatePassword;
                             mresponseSuccess.data = result;
                             callback(null, mresponseSuccess);
@@ -341,7 +351,11 @@ module.exports = function (Users) {
                 sendEmailViaNodeMailer(
                     response.email,
                     mailAttachment.subject,
-                    mailAttachment.text
+                    mailAttachment.body
+                );
+                Users.app.models.Notifications.addNotification(
+                    response.id,
+                    `You have created a new schedule by the name ${title} which is scheduled for ${time}`
                 );
                 // mresponseSuccess.message = msuccess.success;
                 // mresponseSuccess.data = response;

@@ -11,6 +11,8 @@
     "password": "",
     "name": "jobtodo",
     "user": "",
+    "useNewUrlParser": true,
+    "useUnifiedTopology": true,
     "connector": "mongodb"
   }
 }

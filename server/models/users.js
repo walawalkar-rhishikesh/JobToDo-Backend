@@ -84,7 +84,7 @@ module.exports = function (Users) {
                 full_name: full_name.trim(),
                 email: email.toLowerCase().trim(),
                 password: hash,
-                reset_pin:0
+                reset_pin: 0
             };
             Users.find({ where: { email } }, (err, response) => {
                 if (err) {
@@ -206,11 +206,11 @@ module.exports = function (Users) {
                 var result = response;
                 result.reset_pin = Math.floor(Math.random() * 90000) + 10000;
                 response.updateAttributes(result, (response) => {
-                    var mailAttachment = nodeMailerConst.resetPinRequest(result.full_name,result.reset_pin);
+                    var mailAttachment = nodeMailerConst.resetPinRequest(result.full_name, result.reset_pin);
                     sendEmailViaNodeMailer(
-                      result.email,
-                      mailAttachment.subject,
-                      mailAttachment.body
+                        result.email,
+                        mailAttachment.subject,
+                        mailAttachment.body
                     );
                     mresponseSuccess.message = msuccess.updatePassword;
                     mresponseSuccess.data = result;
@@ -260,7 +260,7 @@ module.exports = function (Users) {
             callback(null, mresponseError);
             return;
         }
-        if(!reset_pin){
+        if (!reset_pin) {
             mresponseError.message = merror.invalidResetPin;
             callback(null, mresponseError);
             return;
@@ -271,7 +271,7 @@ module.exports = function (Users) {
                 callback(null, mresponseError);
             } else if (response && response.email) {
 
-                if(response.reset_pin === reset_pin){
+                if (response.reset_pin === reset_pin) {
                     var result = response;
                     generateHashPassword(password.trim()).then((hash) => {
                         response.password = hash;
@@ -279,16 +279,16 @@ module.exports = function (Users) {
                         response.updateAttributes(result, (response) => {
                             var mailAttachment = nodeMailerConst.passwordResetConfirmation(result.full_name);
                             sendEmailViaNodeMailer(
-                              result.email,
-                              mailAttachment.subject,
-                              mailAttachment.body
+                                result.email,
+                                mailAttachment.subject,
+                                mailAttachment.body
                             );
                             mresponseSuccess.message = msuccess.updatePassword;
                             mresponseSuccess.data = result;
                             callback(null, mresponseSuccess);
                         });
                     })
-                }else{
+                } else {
                     mresponseError.message = merror.invalidResetPin;
                     callback(null, mresponseError);
                     return;
@@ -296,6 +296,59 @@ module.exports = function (Users) {
             } else {
                 mresponseError.message = merror.no_records;
                 callback(null, mresponseError);
+            }
+        });
+    };
+
+    Users.remoteMethod("sendScheduleNotification", {
+        http: { path: "/sendScheduleNotification", verb: "post" },
+        description: "This API is used for sendScheduleNotification",
+        accepts: [
+            {
+                arg: "id",
+                type: "string",
+                required: true,
+            },
+            {
+                arg: "title",
+                type: "string",
+                required: true,
+            },
+            {
+                arg: "time",
+                type: "String",
+                required: true,
+            },
+        ],
+        returns: { arg: "body", type: "object", root: true },
+    });
+    Users.sendScheduleNotification = function (
+        id,
+        title,
+        time,
+        callback
+    ) {
+        Users.findOne({ where: { id } }, (err, response) => {
+            if (err) {
+                // mresponseError.message = err;
+                // callback(null, mresponseError);
+            } else if (response && response.email) {
+                var mailAttachment = nodeMailerConst.scheduleCreated(
+                    response.full_name,
+                    title,
+                    time
+                );
+                sendEmailViaNodeMailer(
+                    response.email,
+                    mailAttachment.subject,
+                    mailAttachment.text
+                );
+                // mresponseSuccess.message = msuccess.success;
+                // mresponseSuccess.data = response;
+                // callback(null, mresponseSuccess);
+            } else {
+                // mresponseError.message = merror.request;
+                // callback(null, mresponseError);
             }
         });
     };

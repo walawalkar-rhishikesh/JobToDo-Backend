@@ -8,7 +8,7 @@ var messages =  {
 	msuccess : {		
 		success : "Success",
 		no_records : "No Record Found",
-		insert : "Inserted Successfully",
+		insert : "Added Successfully",
 		update : "Updated Successfully",
 		delete : "Deleted Successfully",
 		login : "Login Sucessfull",

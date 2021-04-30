@@ -13,15 +13,45 @@
     },
     "title": {
       "type": "string",
-      "required": true
+      "required": false
     },
-    "date": {
+    "company": {
+      "type": "string",
+      "required": false
+    },
+    "contact": {
+      "type": "string",
+      "required": false
+    },
+    "method": {
+      "type": "string",
+      "required": false
+    },
+    "description": {
+      "type": "string",
+      "required": false
+    },
+    "notes": {
+      "type": "string",
+      "required": false
+    },
+    "meeting_link": {
+      "type": "string",
+      "required": false
+    },
+    "scheduled_on":{
       "type": "date",
-      "required": true
+      "required": false
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "uid": {
+      "type": "belongsTo",
+      "model": "Users",
+      "foreignKey": "uid"
+    }
+  },
   "acls": [],
   "methods": {}
 }

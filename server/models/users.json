@@ -28,7 +28,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "uid": {
+      "type": "hasMany",
+      "model": "Schedules",
+      "foreignKey": "uid"
+    }
+  },
   "acls": [],
   "methods": {}
 }

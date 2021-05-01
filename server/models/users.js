@@ -366,4 +366,131 @@ module.exports = function (Users) {
             }
         });
     };
+    Users.remoteMethod("chatBot", {
+        http: { path: "/chatBot", verb: "post" },
+        description: "This API is used for chatBot",
+        accepts: [
+            {
+                arg: "id",
+                type: "string",
+                required: true,
+            },
+            {
+                arg: "text",
+                type: "string",
+                required: false,
+            }
+        ],
+        returns: { arg: "body", type: "object", root: true },
+    });
+    Users.chatBot = function (
+        id,
+        text,
+        callback
+    ) {
+
+        if (!id) {
+            mresponseError.message = "Invalid id";
+            callback(null, mresponseError);
+            return;
+        }
+        if (!text) {
+            mresponseError.message = "Enter some text";
+            callback(null, mresponseError);
+            return;
+        }
+
+        Users.findOne({ where: { id } }, (err, response) => {
+            if (err) {
+                mresponseError.message = err;
+                callback(null, mresponseError);
+            } else if (response && response.email) {
+                if(text.includes("my current weeks schedule")){
+                    Users.app.models.Schedules.getSchedules(
+                        id, 
+                        'weekly',
+                        function(err, data){
+                            getChatsForSchedules(err, data, callback)
+                        }
+                    )
+                }else if(text.includes("my todays schedule")){
+                    Users.app.models.Schedules.getSchedules(
+                        id, 
+                        'today',
+                        function(err, data){
+                            getChatsForSchedules(err, data, callback)
+                        }
+                    )
+                    
+                }else if(text.includes("my current months schedule")){
+                    Users.app.models.Schedules.getSchedules(
+                        id, 
+                        'monthly',
+                        function(err, data){
+                            getChatsForSchedules(err, data, callback)
+                        }
+                    )
+                }else if(text.includes("my name")){
+                    mresponseSuccess.message = `You name is ${response.full_name}`;
+                    callback(null, mresponseSuccess);
+                    return;
+                }else if(text.includes("my email")){
+                    mresponseSuccess.message = `You name is ${response.email}`;
+                    callback(null, mresponseSuccess);
+                    return;
+                }else if(text.includes("send me notification")){
+                    var mailAttachment = nodeMailerConst.chatBotNotification(
+                        response.full_name,
+                    );
+                    sendEmailViaNodeMailer(
+                        response.email,
+                        mailAttachment.subject,
+                        mailAttachment.body
+                    );
+                    Users.app.models.Notifications.addNotification(
+                        response.id,
+                        `Thank you for chatting with JobToDo Bot. Kindly try asking me about your days, weeks or months schedule.`
+                    );
+                    mresponseSuccess.message = `Done, I have sent you a notification`;
+                    callback(null, mresponseSuccess);
+                    return;
+                }else { 
+                    mresponseSuccess.message = "I am not able to process at the moment. Kindly try asking me about your days, weeks or months schedule";
+                    callback(null, mresponseSuccess);
+                    return;
+                }
+            } else {
+                mresponseSuccess.message = "I am not able to process at the moment. Kindly try asking me about your days, weeks or months schedule";
+                callback(null, mresponseSuccess);
+            }
+        });
+
+        
+    };
 };
+function getChatsForSchedules(err, data, callback){
+
+    if(err){
+        mresponseSuccess.message = "I am not able to process at the moment. Kindly try asking me about your days, weeks or months schedule";
+        callback(null, mresponseSuccess);
+        return;
+    }else if(data && data.status == 200){
+        if(data.data && data.data.length > 0){
+            var responseMessage = "Your schedules are \n"
+            data.data.map(function(currentValue, index){
+                responseMessage+= `${currentValue.title} on ${currentValue.scheduled_on} \n`
+            })
+            mresponseSuccess.message = responseMessage;
+            callback(null, mresponseSuccess);
+            return;
+        }else{
+            mresponseSuccess.message = "You don't have any schedules. Please add some schedules.";
+            callback(null, mresponseSuccess);
+            return;
+        }
+    } else{
+        mresponseSuccess.message = "I am not able to process at the moment. Kindly try asking me about your days, weeks or months schedule";
+        callback(null, mresponseSuccess);
+        return;
+    }    
+}

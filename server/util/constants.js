@@ -38,6 +38,14 @@ module.exports = {
                 \nBest \nTeam JobToDo 
             `
             return { subject , body};
+        },
+        chatBotNotification: (full_name) => {
+            let subject = `JobToDo: Chatbot notification`;
+            let body = `Hi ${full_name},
+                \nThank you for chatting with JobToDo Bot. Kindly try asking me about your days, weeks or months schedule.
+                \nBest \nTeam JobToDo 
+            `
+            return { subject , body};
         }
     }
 }

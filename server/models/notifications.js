@@ -1,5 +1,34 @@
 'use strict';
 
+let {
+    generateHashPassword,
+    matchUserPassword,
+} = require("../util/bcrypt-functions");
+
+let {
+    mstatus,
+    msuccess,
+    merror,
+} = require("../util/http-messages");
+
+let { userTypes, nodeMailerConst } = require("../util/constants");
+let { generateJWT } = require("../util/jwt-functions");
+let { sendEmailViaNodeMailer } = require("../util/node-mailer");
+
+
+var mresponseSuccess = {
+    status: mstatus.success,
+    message: msuccess.success,
+    data: {},
+};
+
+var mresponseError = {
+    status: mstatus.error,
+    message: merror.request,
+    data: {},
+};
+
+
 module.exports = function(Notifications) {
     Notifications.remoteMethod("addNotification", {
         http: { path: "/addNotification", verb: "post" },
@@ -60,14 +89,15 @@ module.exports = function(Notifications) {
     });
 
     Notifications.getNotification = function(
-        uid
+        uid,
+        callback
     ){
         if (!uid) {
             mresponseError.message = "Invalid user id";
             callback(null, mresponseError);
             return;
         }
-        Notifications.find({where: {uid}}, function(err, response){
+        Notifications.find({where: {uid}, order: ["id DESC"],}, function(err, response){
             if (err) {
                 mresponseError.message = err;
                 callback(null, mresponseError);

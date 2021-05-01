@@ -127,6 +127,74 @@ module.exports = function (Users) {
         });
     };
 
+    Users.remoteMethod("updateUser", {
+        http: { path: "/updateUser", verb: "post" },
+        description: "This API is used for user signup",
+        accepts: [
+            {
+                arg: "id",
+                type: "string",
+            },
+            {
+                arg: "full_name",
+                type: "string",
+            },
+            {
+                arg: "email",
+                type: "string",
+            },
+            {
+                arg: "phone",
+                type: "string",
+            }
+        ],
+        returns: { arg: "body", type: "object", root: true },
+    });
+    Users.updateUser = function (
+        id,
+        full_name,
+        email,
+        phone,
+        callback
+    ) {
+        email = email.toLowerCase();
+        if (!full_name) {
+            mresponseError.message = merror.userFName;
+            callback(null, mresponseError);
+            return;
+        }
+        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            mresponseError.message = merror.emailFormat;
+            callback(null, mresponseError);
+            return;
+        }
+            Users.findOne({ where: { id } }, (err, response) => {
+                
+                if (err) {
+                    mresponseError.message = err;
+                    callback(null, mresponseError);
+                } else if (response) {
+                    console.log(response)
+                    var result = response
+                    result.full_name = full_name
+                    result.email = email
+                    response.updateAttributes(result, (response) => {
+                        Users.app.models.Notifications.addNotification(
+                            id,
+                            `You have updated a your profile.`
+                        );
+                        mresponseSuccess.message = msuccess.update;
+                        mresponseSuccess.data = result;
+                        callback(null, mresponseSuccess);
+                    });
+                } else {
+                    
+                            mresponseError.message = merror.no_records;
+                            callback(null, mresponseError);
+                }
+            });
+    };
+
     Users.remoteMethod("signin", {
         http: { path: "/signin", verb: "get" },
         description: "This API is used for user signin",
@@ -476,10 +544,10 @@ function getChatsForSchedules(err, data, callback){
         return;
     }else if(data && data.status == 200){
         if(data.data && data.data.length > 0){
-            var responseMessage = "Your schedules are \n"
-            data.data.map(function(currentValue, index){
-                responseMessage+= `${currentValue.title} on ${currentValue.scheduled_on} \n`
-            })
+            var responseMessage = `You have ${data.data} schedules.`
+            // data.data.map(function(currentValue, index){
+            //     responseMessage+= `${currentValue.title} on ${currentValue.scheduled_on} \n`
+            // })
             mresponseSuccess.message = responseMessage;
             callback(null, mresponseSuccess);
             return;

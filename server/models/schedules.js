@@ -291,6 +291,9 @@ module.exports = function (Schedules) {
             };
         }else if(type === "weekly"){
 
+            var start = new Date();
+            start.setHours(0, 1, 1);
+
             let currentDate = moment();
             var weekStart = currentDate.clone().startOf('week');
             var weekEnd = currentDate.clone().endOf('week');
@@ -299,11 +302,14 @@ module.exports = function (Schedules) {
 
             searchRequest = {
                 where: {
-                    and: [{ scheduled_on: { between: [weekStart, weekEnd] } }, { uid }],
+                    and: [{ scheduled_on: { between: [start, weekEnd] } }, { uid }],
                 },
                 order: ["scheduled_on ASC"],
             };
         }else if(type === "monthly"){
+
+            var start = new Date();
+            start.setHours(0, 1, 1);
 
             var monthStart = new moment().startOf('month');
             var monthEnd = new moment().endOf("month");
@@ -312,7 +318,7 @@ module.exports = function (Schedules) {
 
             searchRequest = {
                 where: {
-                    and: [{ scheduled_on: { between: [monthStart, monthEnd] } }, { uid }],
+                    and: [{ scheduled_on: { between: [start, monthEnd] } }, { uid }],
                 },
                 order: ["scheduled_on ASC"],
             };

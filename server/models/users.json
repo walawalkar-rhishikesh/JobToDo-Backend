@@ -33,6 +33,11 @@
       "type": "hasMany",
       "model": "Schedules",
       "foreignKey": "uid"
+    },
+    "notification_uid": {
+      "type": "hasMany",
+      "model": "Notifications",
+      "foreignKey": "uid"
     }
   },
   "acls": [],

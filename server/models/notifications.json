@@ -18,7 +18,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "uid": {
+      "type": "belongsTo",
+      "model": "Users",
+      "foreignKey": "uid"
+    }
+  },
   "acls": [],
   "methods": {}
 }

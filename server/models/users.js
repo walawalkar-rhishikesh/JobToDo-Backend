@@ -544,7 +544,7 @@ function getChatsForSchedules(err, data, callback){
         return;
     }else if(data && data.status == 200){
         if(data.data && data.data.length > 0){
-            var responseMessage = `You have ${data.data} schedules.`
+            var responseMessage = `You have ${data.data.length} schedules.`
             // data.data.map(function(currentValue, index){
             //     responseMessage+= `${currentValue.title} on ${currentValue.scheduled_on} \n`
             // })
